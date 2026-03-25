@@ -227,6 +227,7 @@ export default function CricRoar() {
     localStorage.setItem("cr_user", JSON.stringify(u));
     setUser(u);
     setShowName(false);
+    setScreen("main");
     if (!isDemo) sb.current.upsertUser(u);
   };
 
