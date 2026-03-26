@@ -1,0 +1,6 @@
+{
+  "appId": "com.cricroar.app",
+  "appName": "cricroar",
+  "webDir": "dist",
+  "bundledWebRuntime": false
+}

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">cricroar</string>
+    <string name="title_activity_main">cricroar</string>
+    <string name="package_name">com.cricroar.app</string>
+    <string name="custom_url_scheme">com.cricroar.app</string>
+</resources>
