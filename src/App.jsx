@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import logoSrc from "/logo.png";
 import { GLOBAL_CSS } from "./styles.js";
 import { CFG, TEAMS, FREE_LIMIT, uid, today } from "./config.js";
 import { makeSB, moderate, genRoast, fetchScores, payRazorpay } from "./services.js";
@@ -24,6 +25,7 @@ export default function App() {
   const [tab,       setTab]       = useState("scores");
   const [user,      setUser]      = useState(null);
   const [matches,   setMatches]   = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [selMatch,  setSelMatch]  = useState(null);
   const [myTeam,    setMyTeam]    = useState(null);
   const [roasts,    setRoasts]    = useState([]);
@@ -86,9 +88,10 @@ export default function App() {
 
   // ── Live scores (only when logged in) ─────────────────────
   useEffect(() => {
-    if (!user || !hasApiKey) return;
-    fetchScores().then(d => { if (d?.length) setMatches(d); });
-    const t = setInterval(() => fetchScores().then(d => { if (d?.length) setMatches(d); }), 30000);
+    if (!user || !hasApiKey) { setIsLoading(false); return; }
+    setIsLoading(true);
+    fetchScores().then(d => { setMatches(d || []); setIsLoading(false); });
+    const t = setInterval(() => fetchScores().then(d => { if (d) setMatches(d); }), 30000);
     return () => clearInterval(t);
   }, [user, hasApiKey]);
 
@@ -217,7 +220,7 @@ export default function App() {
       <div style={{background:"var(--surface)",borderBottom:"1px solid var(--border)",flexShrink:0,boxShadow:"0 1px 4px rgba(15,23,42,.06)"}}>
         <div style={{padding:"12px 16px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
           <div style={{display:"flex",alignItems:"center",gap:9}}>
-            <img src="/logo.png" alt="" style={{width:32,height:32,objectFit:"contain"}}
+            <img src={logoSrc} alt="" style={{width:32,height:32,objectFit:"contain"}}
               onError={e=>{e.target.style.display="none";e.target.nextSibling.style.display="flex";}}/>
             <div style={{display:"none",width:32,height:32,borderRadius:8,background:"linear-gradient(135deg,#1A2B6D,#FF6B00)",alignItems:"center",justifyContent:"center"}}>
               <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:13,fontWeight:900,color:"#fff"}}>CR</span>
@@ -250,7 +253,7 @@ export default function App() {
 
       {/* Content */}
       <div style={{flex:1,overflowY:tab==="war"&&selMatch&&myTeam?"hidden":"auto",position:"relative"}}>
-        {tab==="scores" && <ScoresTab matches={matches} preds={preds} userPred={userPred} isPro={isPro} onMatchClick={id=>{setSelMatch(id);setTab("war");}} doPredict={doPredict} setShowPro={setShowPro} hasApiKey={hasApiKey}/>}
+        {tab==="scores" && <ScoresTab matches={matches} isLoading={isLoading} preds={preds} userPred={userPred} isPro={isPro} onMatchClick={id=>{setSelMatch(id);setTab("war");}} doPredict={doPredict} setShowPro={setShowPro} hasApiKey={hasApiKey}/>}
         {tab==="war"    && <WarTab match={match} selMatch={selMatch} myTeam={myTeam} setMyTeam={setMyTeam} setSelMatch={setSelMatch} matches={matches} T1={T1} T2={T2} MT={MT} OT={OT} oppKey={oppKey} roasts={roasts} input={input} setInput={setInput} send={send} sending={sending} blocked={blocked} doVote={doVote} doReport={doReport} voted={voted} reported={reported} doAI={doAI} aiLoad={aiLoad} aiToast={aiToast} topR={topR} meter={meter} myPct={myPct} isPro={isPro} roastsLeft={roastsLeft} chatRef={chatRef} setShowPro={setShowPro}/>}
         {tab==="profile"&& <ProfileTab user={user} isPro={isPro} setShowPro={setShowPro} onLogout={()=>{localStorage.removeItem("cr_user");localStorage.removeItem("cr_token");setUser(null);setPage("login");}}/>}
       </div>

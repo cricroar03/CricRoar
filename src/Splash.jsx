@@ -1,4 +1,5 @@
 import { GLOBAL_CSS } from "./styles.js";
+import logoSrc from "/logo.png";
 
 export default function Splash() {
   return (
@@ -7,9 +8,8 @@ export default function Splash() {
       {/* Soft background */}
       <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse 80% 60% at 50% -10%,rgba(26,43,109,.07) 0%,transparent 70%)",pointerEvents:"none"}}/>
       <div className="pop" style={{textAlign:"center",position:"relative",zIndex:1}}>
-        {/* Logo */}
         <img
-          src="/logo.png"
+          src={logoSrc}
           alt="CricRoar"
           style={{width:130,height:130,objectFit:"contain",marginBottom:18,filter:"drop-shadow(0 8px 20px rgba(26,43,109,.18))"}}
           onError={e => {

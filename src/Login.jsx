@@ -1,4 +1,5 @@
 import { useState } from "react";
+import logoSrc from "/logo.png";
 import { GLOBAL_CSS } from "./styles.js";
 
 function GoogleIcon() {
@@ -61,7 +62,7 @@ export default function Login({ onGoogle, onGuest, isDemo, error }) {
       <div style={{flex:1,padding:"0 20px",position:"relative",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",paddingBottom:24}}>
         {/* Logo area */}
         <div className="pop" style={{textAlign:"center",marginBottom:28}}>
-          <img src="/logo.png" alt="CricRoar" style={{width:110,height:110,objectFit:"contain",marginBottom:4,filter:"drop-shadow(0 6px 18px rgba(26,43,109,.2))"}}
+          <img src={logoSrc} alt="CricRoar" style={{width:110,height:110,objectFit:"contain",marginBottom:4,filter:"drop-shadow(0 6px 18px rgba(26,43,109,.2))"}}
             onError={e=>{e.target.style.display="none";e.target.nextSibling.style.display="block";}}/>
           <div style={{display:"none"}}>
             <div style={{width:80,height:80,borderRadius:20,background:"linear-gradient(135deg,#1A2B6D,#FF6B00)",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 8px",boxShadow:"0 6px 24px rgba(26,43,109,.3)"}}>

@@ -164,18 +164,27 @@ function NoScores() {
 }
 
 // ── Scores Tab ────────────────────────────────────────────────
-export default function ScoresTab({ matches, preds, userPred, isPro, onMatchClick, doPredict, setShowPro, hasApiKey }) {
+export default function ScoresTab({ matches, isLoading, preds, userPred, isPro, onMatchClick, doPredict, setShowPro, hasApiKey }) {
   return (
     <div style={{padding:"14px 14px 70px"}}>
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14,padding:"0 2px"}}>
         <div style={{display:"flex",alignItems:"center",gap:8}}>
           <div style={{width:4,height:18,background:"linear-gradient(180deg,var(--navy),var(--orange))",borderRadius:2}}/>
-          <span style={{fontSize:14,fontWeight:800,color:"var(--t1)"}}>IPL 2026 Matches</span>
+          <span style={{fontSize:14,fontWeight:800,color:"var(--t1)"}}>All Matches</span>
         </div>
         {hasApiKey && <div style={{fontSize:9,color:"var(--t3)",fontWeight:600}}>Auto-refreshes every 30s</div>}
       </div>
 
-      {matches.length === 0 ? <NoScores/> : matches.map((m,i) => (
+      {!hasApiKey ? <NoScores/> : 
+       isLoading ? (
+         <div style={{padding:40,textAlign:"center"}}><span className="spin" style={{fontSize:24}}>◌</span><div style={{fontSize:12,marginTop:8,color:"var(--t3)",fontWeight:500}}>Loading matches...</div></div>
+       ) : 
+       matches.length === 0 ? (
+         <div style={{margin:"40px 16px",background:"var(--card)",borderRadius:18,padding:"32px 20px",textAlign:"center",boxShadow:"var(--shadow)",border:"1px solid var(--border)"}}>
+           <div style={{fontSize:15,fontWeight:800,color:"var(--navy)",marginBottom:6}}>No live matches currently</div>
+           <div style={{fontSize:12,color:"var(--t3)",fontWeight:500}}>Check back later for cricket action.</div>
+         </div>
+       ) : matches.map((m,i) => (
         <MatchCard key={m.id} m={m} pred={preds[m.id]} voted={userPred[m.id]} isPro={isPro} delay={i*.06}
           onClick={()=>onMatchClick(m.id)} doPredict={doPredict} setShowPro={setShowPro}/>
       ))}

@@ -18,7 +18,7 @@ export function makeSB(url, key) {
       return () => clearInterval(t);
     },
     signInGoogle: async () => {
-      window.location.href = `${url}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(window.location.origin)}`;
+      window.location.href = `${url}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent('https://cric-roar.vercel.app')}`;
     },
     getSession: async () => {
       const hash = window.location.hash;
@@ -88,16 +88,30 @@ export async function genRoast(teamKey) {
 export async function fetchScores() {
   if (!CFG.CRICKET_API) return null;
   try {
-    const r = await fetch(`https://api.cricketdata.org/cricket/?apikey=${CFG.CRICKET_API}&offset=0`);
-    const d = await r.json();
-    if (d.status !== "success") return null;
-    return (d.data||[])
-      .filter(m => true)
-      .slice(0, 15)
-      .map(m => ({
+    let url = `https://api.cricapi.com/v1/currentMatches?apikey=${CFG.CRICKET_API}&offset=0`;
+    let r = await fetch(url);
+    let d = await r.json();
+    
+    // Fallback if no matches returned or empty data
+    if (d.status !== "success" || !d.data || d.data.length === 0) {
+      url = `https://api.cricapi.com/v1/matches?apikey=${CFG.CRICKET_API}&offset=0`;
+      r = await fetch(url);
+      d = await r.json();
+    }
+    if (d.status !== "success" || !d.data) return [];
+    
+    // Prioritize LIVE, then UPCOMING, then COMPLETED
+    const sorted = d.data.sort((a, b) => {
+      const isALive = a.matchStarted && !a.matchEnded;
+      const isBLive = b.matchStarted && !b.matchEnded;
+      if (isALive !== isBLive) return isALive ? -1 : 1;
+      return 0; // retain original API order for rest
+    });
+
+    return sorted.slice(0, 15).map(m => ({
         id: m.id,
-        t1: resolveTeam(m.teams?.[0]) || m.teams?.[0] || "TBA",
-        t2: resolveTeam(m.teams?.[1]) || m.teams?.[1] || "TBA",
+        t1: resolveTeam(m.teams?.[0]) || m.teamInfo?.[0]?.shortname || m.teams?.[0] || "TBA",
+        t2: resolveTeam(m.teams?.[1]) || m.teamInfo?.[1]?.shortname || m.teams?.[1] || "TBA",
         t1img: m.teamInfo?.[0]?.img || "",
         t2img: m.teamInfo?.[1]?.img || "",
         status: m.matchStarted&&!m.matchEnded?"LIVE":m.matchEnded?"ENDED":"UPCOMING",
@@ -108,13 +122,13 @@ export async function fetchScores() {
         s2: m.score?.[1]?`${m.score[1].r}/${m.score[1].w}`:null, ov2:m.score?.[1]?.o||null,
         target: m.score?.[0]?String(Number(m.score[0].r)+1):null,
       }));
-  } catch { return null; }
+  } catch { return []; } // Return empty array to identify loading vs loaded-but-empty
 }
 
 export async function fetchMatchInfo(id) {
   if (!CFG.CRICKET_API) return null;
   try {
-    const r = await fetch(`https://api.cricketdata.org/v1/match/info?apikey=${CFG.CRICKET_API}&id=${id}`);
+    const r = await fetch(`https://api.cricapi.com/v1/match/info?apikey=${CFG.CRICKET_API}&id=${id}`);
     const d = await r.json();
     return d.status === "success" ? d.data : null;
   } catch { return null; }
@@ -123,7 +137,7 @@ export async function fetchMatchInfo(id) {
 export async function fetchMatchScorecard(id) {
   if (!CFG.CRICKET_API) return null;
   try {
-    const r = await fetch(`https://api.cricketdata.org/v1/match/scorecard?apikey=${CFG.CRICKET_API}&id=${id}`);
+    const r = await fetch(`https://api.cricapi.com/v1/match/scorecard?apikey=${CFG.CRICKET_API}&id=${id}`);
     const d = await r.json();
     return d.status === "success" ? d.data : null;
   } catch { return null; }
@@ -132,7 +146,7 @@ export async function fetchMatchScorecard(id) {
 export async function fetchMatchCommentary(id) {
   if (!CFG.CRICKET_API) return null;
   try {
-    const r = await fetch(`https://api.cricketdata.org/v1/match/cbbinfo?apikey=${CFG.CRICKET_API}&id=${id}`);
+    const r = await fetch(`https://api.cricapi.com/v1/match/cbbinfo?apikey=${CFG.CRICKET_API}&id=${id}`);
     const d = await r.json();
     return d.status === "success" ? d.data : null;
   } catch { return null; }
