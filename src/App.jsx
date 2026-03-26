@@ -6,6 +6,7 @@ import Splash from "./Splash.jsx";
 import Login from "./Login.jsx";
 import ScoresTab from "./ScoresTab.jsx";
 import WarTab from "./WarTab.jsx";
+import MatchScreen from "./MatchScreen.jsx";
 import ProfileTab from "./ProfileTab.jsx";
 import ProModal from "./ProModal.jsx";
 
@@ -202,6 +203,11 @@ export default function App() {
   // ── Render ─────────────────────────────────────────────────
   if (page==="splash") return <Splash/>;
   if (page==="login")  return <Login onGoogle={loginGoogle} onGuest={loginGuest} isDemo={isDemo} error={authErr}/>;
+
+  if (selMatch && match) {
+    const warProps = { match, selMatch, myTeam, setMyTeam, setSelMatch, matches, T1, T2, MT, OT, oppKey, roasts, input, setInput, send, sending, blocked, doVote, doReport, voted, reported, doAI, aiLoad, aiToast, topR, meter, myPct, isPro, roastsLeft, chatRef, setShowPro };
+    return <MatchScreen match={match} onBack={() => {setSelMatch(null); setTab("scores");}} hasApiKey={hasApiKey} warProps={warProps} />;
+  }
 
   return (
     <div style={{height:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column",maxWidth:480,margin:"0 auto",position:"relative"}}>

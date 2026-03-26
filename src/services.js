@@ -92,19 +92,49 @@ export async function fetchScores() {
     const d = await r.json();
     if (d.status !== "success") return null;
     return (d.data||[])
-      .filter(m => (m.name||"").toLowerCase().includes("ipl"))
-      .slice(0, 6)
+      .filter(m => true)
+      .slice(0, 15)
       .map(m => ({
         id: m.id,
-        t1: resolveTeam(m.teams?.[0]) || m.teams?.[0],
-        t2: resolveTeam(m.teams?.[1]) || m.teams?.[1],
+        t1: resolveTeam(m.teams?.[0]) || m.teams?.[0] || "TBA",
+        t2: resolveTeam(m.teams?.[1]) || m.teams?.[1] || "TBA",
+        t1img: m.teamInfo?.[0]?.img || "",
+        t2img: m.teamInfo?.[1]?.img || "",
         status: m.matchStarted&&!m.matchEnded?"LIVE":m.matchEnded?"ENDED":"UPCOMING",
+        state: m.status || "",
         time: m.date||"",
         venue: m.venue||"",
         s1: m.score?.[0]?`${m.score[0].r}/${m.score[0].w}`:null, ov1:m.score?.[0]?.o||null,
         s2: m.score?.[1]?`${m.score[1].r}/${m.score[1].w}`:null, ov2:m.score?.[1]?.o||null,
         target: m.score?.[0]?String(Number(m.score[0].r)+1):null,
       }));
+  } catch { return null; }
+}
+
+export async function fetchMatchInfo(id) {
+  if (!CFG.CRICKET_API) return null;
+  try {
+    const r = await fetch(`https://api.cricketdata.org/v1/match/info?apikey=${CFG.CRICKET_API}&id=${id}`);
+    const d = await r.json();
+    return d.status === "success" ? d.data : null;
+  } catch { return null; }
+}
+
+export async function fetchMatchScorecard(id) {
+  if (!CFG.CRICKET_API) return null;
+  try {
+    const r = await fetch(`https://api.cricketdata.org/v1/match/scorecard?apikey=${CFG.CRICKET_API}&id=${id}`);
+    const d = await r.json();
+    return d.status === "success" ? d.data : null;
+  } catch { return null; }
+}
+
+export async function fetchMatchCommentary(id) {
+  if (!CFG.CRICKET_API) return null;
+  try {
+    const r = await fetch(`https://api.cricketdata.org/v1/match/cbbinfo?apikey=${CFG.CRICKET_API}&id=${id}`);
+    const d = await r.json();
+    return d.status === "success" ? d.data : null;
   } catch { return null; }
 }
 
